@@ -1,7 +1,9 @@
 import User from "../Models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+
 import { generateToken } from "../lib/utils.js";
+
 export const signup=async(req,res)=>{
     const {fullname,email,password}=req.body;
     try {
@@ -49,11 +51,42 @@ export const signup=async(req,res)=>{
     }   
 };
 
-export const login=(req,res)=>{
-    res.send("login route");
+export const login=async (req,res)=>{
+    const {email,password}=req.body;
+    try {
+        const user=await User.findOne({email});
+        if(!user){
+           return res.status(400).json({message:"Invalid credentials"});
+        }
+        const ispasswordcorrect=await bcrypt.compare(password,user.password);
+        if(!ispasswordcorrect){
+            return res.status(400).json({message:"Invalid credentials"});
+        }
+        generateToken(user._id,res);
+        res.status(200).json({
+            _id:user._id,
+            fullname:user.fullname,
+            email:user.email,
+            profilepic:user.profilepic,
+        });
+    } catch (error) {
+        res.status(500).json({message:"Internal server error"});
+        console.log("Error in login",error.message);
+    }
 };
-export const logout=(req,res)=>{
-    res.send("logout route");
+export const logout=async (req,res)=>{
+    try {
+        res.cookie("jwt","",{
+            MaxAge:0,
+        })
+        res.status(200).json({message:"Logged out successfully"});
+    } catch (error) {
+        console.log("Error in logout",error.message);
+        res.status(500).json({message:"Internal server error"});
+    }
 };
 
+export const updateProfilePic=async(req,res)=>{
+    res.send("update profile pic route");
+}
 
