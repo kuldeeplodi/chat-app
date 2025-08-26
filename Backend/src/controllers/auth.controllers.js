@@ -2,7 +2,9 @@ import User from "../Models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+
 import { generateToken } from "../lib/utils.js";
+import cloudinary from "../lib/cloudinary.js";
 
 export const signup=async(req,res)=>{
     const {fullname,email,password}=req.body;
@@ -87,6 +89,28 @@ export const logout=async (req,res)=>{
 };
 
 export const updateProfilePic=async(req,res)=>{
-    res.send("update profile pic route");
+    try {
+       const {profilepic}=req.body ;
+       const userId=req.user._id;
+       if(!profilepic){
+        res.status(400).json({message:"Profile picture is required"});
+       }
+       const uploadResult=await cloudinary.uploader.upload(profilepic);
+       User.findByIdAndUpdate(userId,{profilepic:uploadResult.secure_url},{new:true});
+       res.status(200).json({message:"Profile picture updated successfully"});
+    } catch (error) {
+        console.log("Error in updateProfilePic",error.message);
+        res.status(500).json({message:"Internal server error"});
+    }
+}
+
+export const checkUser=(req,res)=>{
+    try{
+       res.status(200).json(req.user) ;
+    }
+    catch(error){
+        console.log("Error in checkUser",error.message);
+        res.status(500).json({message:"Internal server error"});
+    }
 }
 
