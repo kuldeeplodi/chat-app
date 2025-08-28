@@ -10,7 +10,7 @@ export const signup=async(req,res)=>{
     const {fullname,email,password}=req.body;
     try {
         
-        if(!email ||!fullname || !password){
+        if(!fullname ||!email || !password){
           return res.status(400).json({message:"all fields are required"});
         }
         if(password.length<6){
@@ -93,16 +93,16 @@ export const updateProfilePic=async(req,res)=>{
        const {profilepic}=req.body ;
        const userId=req.user._id;
        if(!profilepic){
-        res.status(400).json({message:"Profile picture is required"});
+        return res.status(400).json({message:"Profile picture is required"});
        }
        const uploadResult=await cloudinary.uploader.upload(profilepic);
-       User.findByIdAndUpdate(userId,{profilepic:uploadResult.secure_url},{new:true});
+       await User.findByIdAndUpdate(userId,{profilepic:uploadResult.secure_url},{new:true});
        res.status(200).json({message:"Profile picture updated successfully"});
     } catch (error) {
-        console.log("Error in updateProfilePic",error.message);
+        console.log("Error in updateProfilePic",error);
         res.status(500).json({message:"Internal server error"});
     }
-}
+};
 
 export const checkUser=(req,res)=>{
     try{
@@ -112,5 +112,5 @@ export const checkUser=(req,res)=>{
         console.log("Error in checkUser",error.message);
         res.status(500).json({message:"Internal server error"});
     }
-}
+};
 
