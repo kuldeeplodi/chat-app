@@ -1,4 +1,4 @@
-import Message from "../models/message.model.js";
+import Message from "../Models/message.model.js";
 import User from "../Models/user.model.js";
 import cloudinary from "../lib/cloudinary.js";
 
