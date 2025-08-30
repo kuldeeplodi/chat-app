@@ -15,9 +15,9 @@ import {Navigate} from 'react-router-dom';
 import {Toaster} from 'react-hot-toast';
 
 function App() {
-  const {authUser,isCheckAuth,checkAuth}=useAuthStore();
+  const {authUser,isCheckAuth,checkAuth,onlineUsers}=useAuthStore();
   const {theme}=useThemeStore();
-
+console.log({onlineUsers})
   useEffect(()=>{checkAuth()},[checkAuth])
   console.log({authUser});
 

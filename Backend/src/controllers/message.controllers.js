@@ -2,6 +2,8 @@ import Message from "../models/message.model.js";
 import User from "../Models/user.model.js";
 import cloudinary from "../lib/cloudinary.js";
 
+import { getReceiverSocketId, io } from "../lib/socket.js";
+
 export const getAllUsers = async (req, res) => {
   try {
     const loggedInuserId = req.user._id;
@@ -15,14 +17,14 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-export const getMessages = async (req, res) => {
+export const getMessage = async (req, res) => {
   try {
     const { id: userTochatId } = req.params;
     const myId = req.user._id;
     const messages = await Message.find({
       $or: [
-        { senderID: myId, reveiverId: userTochatId },
-        { senderID: userTochatId, reveiverId: myId },
+        { senderId: myId, receiverId: userTochatId },
+        { senderId: userTochatId, receiverId: myId },
       ],
     });
     res.status(200).json(messages);
@@ -49,9 +51,13 @@ export const sendMessage = async (req, res) => {
     await newMessage.save();
 
    // todo: emit socket event to receiver
+   const receiverSocketId=getReceiverSocketId(receiverId);
+   if(receiverSocketId){
+    io.to(receiverSocketId).emit("newMessage",newMessage)
+   }
     res.status(200).json(newMessage);
   } catch (error) {
-    console.log("error in sending message", error.message);
+    console.log("error in sending message", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
